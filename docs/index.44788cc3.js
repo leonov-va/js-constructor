@@ -519,14 +519,12 @@ function hmrAcceptRun(bundle, id) {
 }
 
 },{}],"f72bh":[function(require,module,exports) {
+var _app = require("./classes/app");
 var _model = require("./model");
 var _indexCss = require("./styles/index.css");
-const $site = document.getElementById("site");
-_model.model.forEach((block)=>{
-    $site.insertAdjacentHTML("beforeend", block.toHTML());
-});
+new _app.App(_model.model).init();
 
-},{"./model":"6z5UC","./styles/index.css":"3frGm"}],"6z5UC":[function(require,module,exports) {
+},{"./model":"6z5UC","./styles/index.css":"3frGm","./classes/app":"dIWjj"}],"6z5UC":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "model", ()=>model
@@ -711,7 +709,9 @@ parcelHelpers.export(exports, "col", ()=>col
 );
 parcelHelpers.export(exports, "css", ()=>css
 );
-function row(content, styles = "") {
+parcelHelpers.export(exports, "block", ()=>block
+);
+function row(content, styles) {
     return `<div class="row" style="${styles}">${content}</div>`;
 }
 function col(content) {
@@ -719,11 +719,104 @@ function col(content) {
 }
 function css(styles = {
 }) {
+    if (typeof styles === "string") return styles;
     const toString = (key)=>`${key}: ${styles[key]}`
     ;
     return Object.keys(styles).map(toString).join(";");
 }
+function block(type) {
+    return `
+    <form name="${type}">
+      <h5>${type}</h5>
+      <div class="form-group">
+        <input class="form-control form-control-sm" name="value" placeholder="value" />
+      </div>
+      <div class="form-group">
+        <input class="form-control form-control-sm" name="styles" placeholder="styles" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-sm">Добавить</button>
+    </form>
+  `;
+}
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3frGm":[function() {},{}]},["fvM8K","f72bh"], "f72bh", "parcelRequire5634")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"3frGm":[function() {},{}],"dIWjj":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "App", ()=>App
+);
+var _sidebar = require("./sidebar");
+var _site = require("./site");
+class App {
+    constructor(model){
+        this.model = model;
+    }
+    init() {
+        const site = new _site.Site("site");
+        site.render(this.model);
+        const updateCallback = (newBlock)=>{
+            this.model.push(newBlock);
+            site.render(this.model);
+        };
+        new _sidebar.Sidebar("panel", updateCallback);
+    }
+}
+
+},{"./site":"h60iQ","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./sidebar":"6p9Kr"}],"h60iQ":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Site", ()=>Site
+);
+class Site {
+    constructor(selector){
+        this.$el = document.getElementById(selector);
+    }
+    render(model) {
+        this.$el.innerHTML = "";
+        model.forEach((block)=>{
+            this.$el.insertAdjacentHTML("beforeend", block.toHTML());
+        });
+    }
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6p9Kr":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Sidebar", ()=>Sidebar
+);
+var _utils = require("../utils");
+var _blocks = require("./blocks");
+class Sidebar {
+    constructor(selector, updateCallback){
+        this.$el = document.getElementById(selector);
+        this.update = updateCallback;
+        this.init();
+    }
+    init() {
+        this.$el.insertAdjacentHTML("afterbegin", this.template);
+        this.$el.addEventListener("submit", this.add.bind(this));
+    }
+    add(event) {
+        event.preventDefault();
+        const type = event.target.name;
+        const value = event.target.value.value;
+        const styles = event.target.styles.value;
+        let newBlock = type === "text" ? new _blocks.TextBlock(value, {
+            styles
+        }) : new _blocks.TitleBlock(value, {
+            styles
+        });
+        this.update(newBlock);
+        event.target.value.value = "";
+        event.target.styles.value = "";
+    }
+    get template() {
+        return [
+            _utils.block("text"),
+            _utils.block("title")
+        ].join("");
+    }
+}
+
+},{"../utils":"7cGjp","./blocks":"bZacL","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["fvM8K","f72bh"], "f72bh", "parcelRequire5634")
 
 //# sourceMappingURL=index.44788cc3.js.map
