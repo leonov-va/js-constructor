@@ -520,81 +520,64 @@ function hmrAcceptRun(bundle, id) {
 
 },{}],"f72bh":[function(require,module,exports) {
 var _model = require("./model");
-var _templates = require("./templates");
 var _indexCss = require("./styles/index.css");
 const $site = document.getElementById("site");
 _model.model.forEach((block)=>{
-    const toHTML = _templates.templates[block.type];
-    if (toHTML) $site.insertAdjacentHTML("beforeend", toHTML(block));
+    $site.insertAdjacentHTML("beforeend", block.toHTML());
 });
 
-},{"./model":"6z5UC","./templates":"6GpRc","./styles/index.css":"3frGm"}],"6z5UC":[function(require,module,exports) {
+},{"./model":"6z5UC","./styles/index.css":"3frGm"}],"6z5UC":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "model", ()=>model
 );
 var _mountainsJpg = require("./assets/mountains.jpg");
 var _mountainsJpgDefault = parcelHelpers.interopDefault(_mountainsJpg);
+var _blocks = require("./classes/blocks");
 const model = [
-    {
-        type: "title",
-        value: "Конструктор сайтов на JS",
-        options: {
-            tag: "h2",
-            styles: {
-                padding: "1.5rem",
-                background: "linear-gradient(to right, #ff0099, #493240)",
-                color: "#fff",
-                "text-align": "center"
-            }
+    new _blocks.TitleBlock("Конструктор сайтов на JS", {
+        tag: "h2",
+        styles: {
+            padding: "1.5rem",
+            background: "linear-gradient(to right, #ff0099, #493240)",
+            color: "#fff",
+            "text-align": "center"
         }
-    },
-    {
-        type: "image",
-        value: _mountainsJpgDefault.default,
-        options: {
-            styles: {
-                display: "flex",
-                "justify-content": "center",
-                padding: "2rem 0"
-            },
-            imageStyles: {
-                width: "500px",
-                height: "auto"
-            },
-            alt: "image"
+    }),
+    new _blocks.ImageBlock(_mountainsJpgDefault.default, {
+        styles: {
+            display: "flex",
+            "justify-content": "center",
+            padding: "2rem 0"
+        },
+        imageStyles: {
+            width: "500px",
+            height: "auto"
+        },
+        alt: "image"
+    }),
+    new _blocks.ColumnsBlock([
+        "111111",
+        "222222",
+        "333333"
+    ], {
+        styles: {
+            padding: "2rem",
+            background: "linear-gradient(to bottom, #8e2de2, #4a00e0)",
+            color: "#fff",
+            "font-weight": "700"
         }
-    },
-    {
-        type: "columns",
-        value: [
-            "111111",
-            "222222",
-            "333333"
-        ],
-        options: {
-            styles: {
-                padding: "2rem",
-                background: "linear-gradient(to bottom, #8e2de2, #4a00e0)",
-                color: "#fff",
-                "font-weight": "700"
-            }
+    }),
+    new _blocks.TextBlock("Some text", {
+        styles: {
+            padding: "1rem",
+            background: "linear-gradient(to left, #f2994a, #f2c94c)",
+            "font-weight": "700"
         }
-    },
-    {
-        type: "text",
-        value: "Some text",
-        options: {
-            styles: {
-                padding: "1rem",
-                background: "linear-gradient(to left, #f2994a, #f2c94c)",
-                "font-weight": "700"
-            }
-        }
-    }, 
+    }), 
 ];
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./assets/mountains.jpg":"3KAjG"}],"gkKU3":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./assets/mountains.jpg":"3KAjG","./classes/blocks":"bZacL"}],"gkKU3":[function(require,module,exports) {
 exports.interopDefault = function(a) {
     return a && a.__esModule ? a : {
         default: a
@@ -662,35 +645,64 @@ exports.getBundleURL = getBundleURLCached;
 exports.getBaseURL = getBaseURL;
 exports.getOrigin = getOrigin;
 
-},{}],"6GpRc":[function(require,module,exports) {
+},{}],"bZacL":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "templates", ()=>templates
+parcelHelpers.export(exports, "TitleBlock", ()=>TitleBlock
 );
-var _utils = require("./utils");
-function title(block) {
-    const { tag ="h1" , styles  } = block.options;
-    return _utils.row(_utils.col(`<${tag}>${block.value}</${tag}>`), _utils.css(styles));
+parcelHelpers.export(exports, "ImageBlock", ()=>ImageBlock
+);
+parcelHelpers.export(exports, "ColumnsBlock", ()=>ColumnsBlock
+);
+parcelHelpers.export(exports, "TextBlock", ()=>TextBlock
+);
+var _utils = require("../utils");
+class Block {
+    constructor(value, options){
+        this.value = value;
+        this.options = options;
+    }
+    toHTML() {
+        throw new Error("Метод toHTML должен быть реализован");
+    }
 }
-function text(block) {
-    return _utils.row(_utils.col(`<p>${block.value}</p>`), _utils.css(block.options.styles));
+class TitleBlock extends Block {
+    constructor(value, options){
+        super(value, options);
+    }
+    toHTML() {
+        const { tag ="h1" , styles  } = this.options;
+        return _utils.row(_utils.col(`<${tag}>${this.value}</${tag}>`), _utils.css(styles));
+    }
 }
-function columns(block) {
-    const html = block.value.map(_utils.col).join("");
-    return _utils.row(html, _utils.css(block.options.styles));
+class ImageBlock extends Block {
+    constructor(value, options){
+        super(value, options);
+    }
+    toHTML() {
+        const { imageStyles: is , alt ="" , styles  } = this.options;
+        return _utils.row(`<img src="${this.value}" alt="${alt}" style="${_utils.css(is)}"/>`, _utils.css(styles));
+    }
 }
-function image(block) {
-    const { imageStyles: is , alt ="" , styles  } = block.options;
-    return _utils.row(`<img src="${block.value}" alt="${alt}" style="${_utils.css(is)}"/>`, _utils.css(styles));
+class ColumnsBlock extends Block {
+    constructor(value, options){
+        super(value, options);
+    }
+    toHTML() {
+        const html = this.value.map(_utils.col).join("");
+        return _utils.row(html, _utils.css(this.options.styles));
+    }
 }
-const templates = {
-    title,
-    text,
-    columns,
-    image
-};
+class TextBlock extends Block {
+    constructor(value, options){
+        super(value, options);
+    }
+    toHTML() {
+        return _utils.row(_utils.col(`<p>${this.value}</p>`), _utils.css(this.options.styles));
+    }
+}
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./utils":"7cGjp"}],"7cGjp":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../utils":"7cGjp"}],"7cGjp":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "row", ()=>row
