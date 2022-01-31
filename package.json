@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "parcel --open -p 3000 --dist-dir build",
+    "start": "parcel --open -p 3000 --dist-dir docs",
     "build": "parcel build --no-source-maps",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,7 +12,7 @@
       "outputFormat": "esmodule",
       "includeNodeModules": false,
       "source": "src/index.html",
-      "distDir": "build",
+      "distDir": "docs",
       "publicUrl": "./"
     }
   },
